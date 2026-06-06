@@ -21,6 +21,7 @@ Wraps [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input) for the UI 
 * **Mobile responsive**: Optimized for touch devices with proper tap targets, prevents iOS zoom, and responsive dropdown
 * **Dark & Light themes**: Comprehensive theme system with automatic system preference detection
 * **Accessibility**: Full ARIA support, screen reader compatibility, keyboard navigation
+* **Parent fieldset disabled detection**: Natively reacts to parent `<fieldset>` disabled state changes (via `DoCheck` hook), disabling dropdown and matching application styles.
 * **Integrations & Ionic ready**: Built-in support for Twilio, Vonage, AWS SNS, and Ionic Framework overlays/themes (see [INTEGRATIONS.md](./projects/ngxsmk-tel-input/INTEGRATIONS.md))
 * SSR‑friendly (no `window` on the server)
 * Easy theming via CSS variables
@@ -451,4 +452,4 @@ Clear `.angular/cache`, rebuild the lib, and restart `ng serve`.
 * UI powered by [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input)
 * Parsing & validation by [`libphonenumber-js`](https://github.com/catamphetamine/libphonenumber-js)
 
-Last updated: 2025-01-21
+Last updated: 2026-06-06

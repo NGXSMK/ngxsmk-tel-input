@@ -133,8 +133,16 @@
   color: var(--tel-fg);
 }
 
-.ngxsmk-tel.disabled {
+.ngxsmk-tel.disabled,
+.ngxsmk-tel:has(input:disabled) {
   opacity: .7;
+  cursor: not-allowed;
+}
+
+.ngxsmk-tel-input__control:disabled {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  border-color: #cbd5e1;
   cursor: not-allowed;
 }
 
@@ -694,17 +702,27 @@
 }
 
 .ngxsmk-tel.disabled .iti__flag-container,
-.ngxsmk-tel.disabled .iti__selected-flag {
+.ngxsmk-tel.disabled .iti__selected-flag,
+.ngxsmk-tel:has(input:disabled) .iti__flag-container,
+.ngxsmk-tel:has(input:disabled) .iti__selected-flag {
   pointer-events: none;
   opacity: 0.6;
 }
 
-:host-context(.dark):not([data-theme="light"]) .ngxsmk-tel-input__control,
-:host([data-theme="dark"]) .ngxsmk-tel-input__control {
+:host-context(.dark):not([data-theme="light"]) .ngxsmk-tel-input__control:not(:disabled),
+:host([data-theme="dark"]) .ngxsmk-tel-input__control:not(:disabled) {
   background: #0f172a !important;
   color: #e2e8f0 !important;
   border-color: #334155 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+:host-context(.dark):not([data-theme="light"]) .ngxsmk-tel-input__control:disabled,
+:host([data-theme="dark"]) .ngxsmk-tel-input__control:disabled {
+  background-color: #1e293b !important;
+  color: #64748b !important;
+  border-color: #334155 !important;
+  box-shadow: none !important;
 }
 
 :host-context(.dark):not([data-theme="light"]) .ngxsmk-tel-input__control:focus,
@@ -784,7 +802,7 @@
 /* Dark mode dropdown arrow icon - duplicate removed, using the one above */
 
 /* Light mode explicit styles to override dark defaults - highest specificity */
-:host([data-theme="light"]) .ngxsmk-tel-input__control {
+:host([data-theme="light"]) .ngxsmk-tel-input__control:not(:disabled) {
   background: #fff !important;
   background-color: #fff !important;
   color: #0f172a !important;
@@ -792,7 +810,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
-:host([data-theme="light"]) .ngxsmk-tel-input__control:focus {
+:host([data-theme="light"]) .ngxsmk-tel-input__control:focus:not(:disabled) {
   background: #fff !important;
   color: #0f172a !important;
   border-color: #2563eb !important;

@@ -121,6 +121,23 @@ describe('NgxsmkTelInputComponent', () => {
       component.setDisabledState(false);
       expect(component.disabled).toBe(false);
     });
+
+    it('should detect when input is natively disabled (e.g. by parent fieldset)', () => {
+      const inputEl = component.inputRef.nativeElement;
+      spyOn(inputEl, 'matches').and.callFake((selector) => {
+        if (selector === ':disabled') return true;
+        return false;
+      });
+
+      expect(component.isNativelyDisabled).toBe(false);
+      
+      component.ngDoCheck();
+      
+      expect(component.isNativelyDisabled).toBe(true);
+      fixture.detectChanges();
+      const root = fixture.nativeElement.querySelector('.ngxsmk-tel');
+      expect(root.classList.contains('disabled')).toBe(true);
+    });
   });
 
   describe('Validator', () => {

@@ -25,6 +25,7 @@ import {
   OnInit,
   HostBinding,
   Injector,
+  DoCheck,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
@@ -139,7 +140,7 @@ interface BeforeInputEvent extends Event {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
       <div class="ngxsmk-tel"
-         [class.disabled]="(disabledSignal() ?? disabled)"
+         [class.disabled]="(disabledSignal() ?? disabled) || isNativelyDisabled"
          [class.ngxsmk-tel--hide-flags]="!(showFlagsSignal() ?? showFlags)"
          [attr.data-size]="(sizeSignal() ?? size)"
          [attr.data-variant]="(variantSignal() ?? variant)"
@@ -209,7 +210,7 @@ interface BeforeInputEvent extends Event {
     { provide: MatFormFieldControl, useExisting: forwardRef(() => NgxsmkTelInputComponent) }
   ]
 })
-export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
+export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
   @ViewChild('telInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   private readonly injector = inject(Injector);
@@ -229,8 +230,22 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   @HostBinding('class.ng-dirty') get ngDirty() { return this.ngControl?.dirty ?? false; }
   @HostBinding('class.ng-pristine') get ngPristine() { return this.ngControl?.pristine ?? false; }
 
+  isNativelyDisabled = false;
+
   ngOnInit(): void {
     this.ngControl = this.injector.get(NgControl, null);
+  }
+
+  ngDoCheck(): void {
+    if (this.inputRef && this.inputRef.nativeElement) {
+      const isCurrentlyDisabled = this.inputRef.nativeElement.matches(':disabled');
+      if (this.isNativelyDisabled !== isCurrentlyDisabled) {
+        this.isNativelyDisabled = isCurrentlyDisabled;
+        this.applyDisabledUi(isCurrentlyDisabled || (this.disabledSignal() ?? this.disabled));
+        this.stateChanges.next();
+        this.cdr.markForCheck();
+      }
+    }
   }
 
   // ========== Signal-based API (Angular 17+) ==========

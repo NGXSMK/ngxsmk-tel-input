@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2026-06-06
+
+### Added
+- **Parent Fieldset Disabled Detection**: Natively intercepts and reacts to parent `<fieldset>` disabled state changes using the `DoCheck` hook to keep the phone input visual styling, accessibility tags (`tabindex="-1"`, `aria-disabled`), and interactivity disabled even when not bound directly.
+
+### Fixed
+- **Input Styling Specificity in Disabled State**: Fixed SCSS theme selectors forcing active backgrounds (e.g. white/dark) on disabled inputs, allowing default browser and custom `.form-control:disabled` backgrounds to apply correctly.
+
 ## [1.8.0] - 2026-06-06
 
 ### Added
