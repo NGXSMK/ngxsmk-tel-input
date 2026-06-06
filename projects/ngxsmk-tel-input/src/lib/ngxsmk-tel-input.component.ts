@@ -994,7 +994,7 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
 
     this.runOutsideZone(() => {
       if (!this.isDestroyed) {
-        this.iti = intlTelInput(this.inputRef.nativeElement, config);
+        this.iti = intlTelInput(this.inputRef.nativeElement, config as any);
       }
     });
 
