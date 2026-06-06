@@ -36,7 +36,7 @@ import { ProfileComponent } from '../../../examples/profile-management/profile.c
               </div>
               <div class="flex flex-col">
                 <span class="text-lg font-semibold text-tf-text-primary dark:text-tf-dark-text-primary">Ngxsmk Tel Input</span>
-                <span class="text-xs text-tf-text-tertiary dark:text-tf-dark-text-tertiary">v1.7.0</span>
+                <span class="text-xs text-tf-text-tertiary dark:text-tf-dark-text-tertiary">v1.8.0</span>
               </div>
             </div>
             <button 
@@ -108,7 +108,7 @@ import { ProfileComponent } from '../../../examples/profile-management/profile.c
               </div>
               <div class="flex flex-wrap gap-2 sm:gap-3">
                 <a 
-                  href="https://github.com/toozuuu/ngxsmk-tel-input" 
+                  href="https://github.com/NGXSMK/ngxsmk-tel-input" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-tf-border-primary dark:border-tf-dark-border-primary text-tf-link dark:text-tf-dark-link hover:bg-tf-bg-tertiary dark:hover:bg-tf-dark-bg-tertiary transition-colors font-medium text-sm sm:text-base min-w-[44px]">
@@ -159,7 +159,7 @@ import { ProfileComponent } from '../../../examples/profile-management/profile.c
                   <span class="material-icons text-xl sm:text-2xl text-tf-warning">info</span>
                 </div>
                 <div class="min-w-0 flex-1">
-                  <div class="text-xl sm:text-2xl font-bold text-tf-text-primary dark:text-tf-dark-text-primary truncate">v1.7.0</div>
+                  <div class="text-xl sm:text-2xl font-bold text-tf-text-primary dark:text-tf-dark-text-primary truncate">v1.8.0</div>
                   <div class="text-xs text-tf-text-tertiary dark:text-tf-dark-text-tertiary uppercase tracking-wider truncate">Version</div>
                 </div>
               </div>
@@ -1032,7 +1032,7 @@ import { ProfileComponent } from '../../../examples/profile-management/profile.c
           <div class="max-w-7xl mx-auto text-center">
             <p class="text-xs sm:text-sm text-tf-text-secondary dark:text-tf-dark-text-secondary mb-4 sm:mb-6 px-2">Built with modern Angular 17+ | High-Performance & Accessible | Optimized for performance and accessibility</p>
             <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-4 sm:mb-6">
-              <a href="https://github.com/toozuuu/ngxsmk-tel-input" target="_blank" rel="noopener noreferrer" class="text-tf-link dark:text-tf-dark-link hover:text-tf-link-hover dark:hover:text-tf-dark-link-hover transition-colors font-medium text-sm sm:text-base">GitHub</a>
+              <a href="https://github.com/NGXSMK/ngxsmk-tel-input" target="_blank" rel="noopener noreferrer" class="text-tf-link dark:text-tf-dark-link hover:text-tf-link-hover dark:hover:text-tf-dark-link-hover transition-colors font-medium text-sm sm:text-base">GitHub</a>
               <a href="https://www.npmjs.com/package/ngxsmk-tel-input" target="_blank" rel="noopener noreferrer" class="text-tf-link dark:text-tf-dark-link hover:text-tf-link-hover dark:hover:text-tf-dark-link-hover transition-colors font-medium text-sm sm:text-base">NPM</a>
             </div>
             <div class="pt-4 sm:pt-6 border-t border-tf-border-primary dark:border-tf-dark-border-primary">

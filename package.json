@@ -1,6 +1,6 @@
 {
   "name": "ngxsmk-tel-input",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Angular telephone input with intl-tel-input + libphonenumber-js",
   "license": "MIT",
   "publishConfig": {
@@ -10,7 +10,7 @@
   "author": {
     "email": "sachindilshan040@gmail.com",
     "name": "Sachin Dilshan",
-    "url": "https://github.com/toozuuu"
+    "url": "https://github.com/NGXSMK"
   },
   "keywords": [
     "ngxsmk-tel-input",
@@ -81,8 +81,11 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.15",
+    "@angular/animations": "^19.2.25",
+    "@angular/cdk": "^19.2.19",
     "@angular/cli": "^19.2.8",
     "@angular/compiler-cli": "^19.2.0",
+    "@angular/material": "^19.2.0",
     "@changesets/cli": "^2.29.5",
     "@types/intl-tel-input": "^18.1.4",
     "@types/jasmine": "~5.1.0",

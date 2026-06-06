@@ -16,7 +16,7 @@ There are several ways you can help improve this project:
 
 ## Reporting Bugs
 
-If you find a bug, please check the [Issues page](https://github.com/toozuuu/ngxsmk-tel-input/issues) to see if it has already been reported.
+If you find a bug, please check the [Issues page](https://github.com/NGXSMK/ngxsmk-tel-input/issues) to see if it has already been reported.
 
 When submitting a new bug report, please include:
 * **Steps to reproduce** the issue.
@@ -26,7 +26,7 @@ When submitting a new bug report, please include:
 
 ## Suggesting Enhancements
 
-If you have an idea for a new feature or an enhancement, please open a new issue on the [Issues page](https://github.com/toozuuu/ngxsmk-tel-input/issues).
+If you have an idea for a new feature or an enhancement, please open a new issue on the [Issues page](https://github.com/NGXSMK/ngxsmk-tel-input/issues).
 
 Describe the feature, why you think it would be useful, and how it aligns with the goals of the library.
 

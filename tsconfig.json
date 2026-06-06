@@ -18,6 +18,9 @@
     "module": "ES2022",
     "importHelpers": true,
     "baseUrl": "./",
+    "types": [
+      "jasmine"
+    ],
     "paths": {
       "ngxsmk-tel-input": ["projects/ngxsmk-tel-input/src/public-api.ts"]
     }

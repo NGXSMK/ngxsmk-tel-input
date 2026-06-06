@@ -5,15 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.8.0] - 2026-06-06
 
 ### Added
+- **MatFormFieldControl Integration**: Full native compatibility inside Angular Material `<mat-form-field>` wrappers.
+- **Custom CSS Override Support (`cssClass` & `cssClassSignal`)**: Allows passing classes directly to the inner input element for Tailwind CSS and 3rd-party framework styling.
+- **showErrorMsg / showErrorMsgSignal**: Toggle visibility of internal validation error elements.
 - **excludeCountries / excludeCountriesSignal**: Exclude specific country ISO codes from appearing in the dropdown list.
 - **searchPlaceholder / searchPlaceholderSignal**: Customizable placeholder text for the country search input.
 - **showFlags / showFlagsSignal**: Hides flags completely from the selected input and country dropdown.
 - **searchCountryFlag / searchCountryFlagSignal**: Hides flag icons only within the dropdown list items while maintaining the selected flag display.
 
+### Fixed
+- **Validation Error Duplication**: Prevented simultaneous 'phoneInvalid' and 'required' validation errors when input is non-empty.
+- **Intermediate Country Switching**: Corrected flag jumping for shared dial codes (e.g. Dominican Republic `+1` switching to `US`) during typing.
+- **Search Input Prefixing**: Stripped leading `+` in country search inputs to match dial codes natively.
+
 ---
+
 
 ## [1.7.0] - 2026-06-06
 

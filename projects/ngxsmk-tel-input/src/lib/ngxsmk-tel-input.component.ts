@@ -36,7 +36,9 @@ import {
   Validator,
   NgControl
 } from '@angular/forms';
-import { AsYouType, CountryCode, validatePhoneNumberLength } from 'libphonenumber-js/min';
+import { AsYouType, CountryCode, validatePhoneNumberLength, getCountryCallingCode } from 'libphonenumber-js/min';
+import { Subject } from 'rxjs';
+import { MatFormFieldControl } from '@angular/material/form-field';
 import { NgxsmkTelInputService } from './ngxsmk-tel-input.service';
 import { CountryMap, IntlTelI18n } from './types';
 import { createPhoneInputState, createFormattedValueSignal, createValidationStatusSignal, createPhoneMetadataSignal, PhoneInputState } from './signals';
@@ -154,7 +156,7 @@ interface BeforeInputEvent extends Event {
           <input
             #telInput
             type="tel"
-            class="ngxsmk-tel-input__control"
+            [class]="'ngxsmk-tel-input__control ' + (cssClassSignal() ?? cssClass || '')"
             [id]="resolvedId"
             [attr.name]="name || null"
             [attr.placeholder]="placeholder || null"
@@ -164,7 +166,7 @@ interface BeforeInputEvent extends Event {
             [attr.aria-invalid]="showError() ? 'true' : 'false'"
             [attr.aria-required]="isRequired ? 'true' : null"
             [attr.aria-describedby]="getAriaDescribedBy()"
-            [attr.aria-errormessage]="showError() && resolvedErrorText() ? resolvedId + '-error' : null"
+            [attr.aria-errormessage]="showError() && resolvedErrorText() && (showErrorMsgSignal() ?? showErrorMsg) ? resolvedId + '-error' : null"
             (blur)="onBlur()"
             (focus)="onFocus()"
           />
@@ -187,7 +189,7 @@ interface BeforeInputEvent extends Event {
       @if (hint && !showError()) {
         <div class="ngxsmk-tel__hint" [id]="resolvedId + '-hint'">{{ hint }}</div>
       }
-      @if (showError() && resolvedErrorText()) {
+      @if (showError() && resolvedErrorText() && (showErrorMsgSignal() ?? showErrorMsg)) {
         <div class="ngxsmk-tel__error" 
              [id]="resolvedId + '-error'"
              role="alert"
@@ -203,10 +205,11 @@ interface BeforeInputEvent extends Event {
   styleUrls: ['./ngxsmk-tel-input.component.scss'],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
-    { provide: NG_VALIDATORS, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true }
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
+    { provide: MatFormFieldControl, useExisting: forwardRef(() => NgxsmkTelInputComponent) }
   ]
 })
-export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator {
+export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
   @ViewChild('telInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   private readonly injector = inject(Injector);
@@ -276,6 +279,12 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
 
   /** Signal-based input: Disabled state */
   disabledSignal = input<boolean | undefined>(undefined);
+
+  /** Signal-based input: Whether to show the internal error message text */
+  showErrorMsgSignal = input<boolean | undefined>(undefined);
+
+  /** Signal-based input: Custom CSS classes for the inner input element. */
+  cssClassSignal = input<string | undefined>(undefined);
 
   /** Signal-based output: Emitted when country selection changes */
   countryChangeSignal = output<{ iso2: CountryCode }>();
@@ -375,11 +384,11 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   /** 'typing' (live), 'blur', or 'off' */
   @Input() formatWhenValid: 'off' | 'blur' | 'typing' = 'typing';
 
-  @Input() placeholder?: string;
+  // placeholder is defined via getter/setter below
   @Input() autocomplete = 'tel';
   @Input() name?: string;
   @Input() inputId?: string;
-  @Input() disabled: boolean = false;
+  // disabled is defined via getter/setter below
 
   @Input() label?: string;
   @Input() hint?: string;
@@ -390,6 +399,10 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   @Input() autoFocus = false;
   @Input() selectOnFocus = false;
   @Input() showErrorWhenTouched = true;
+  /** Whether to show the component's internal validation error message text. */
+  @Input() showErrorMsg = true;
+  /** Custom CSS classes for the inner input element (e.g. for Tailwind CSS, Bootstrap, etc). */
+  @Input() cssClass: string = '';
 
   @Input() dropdownAttachToBody = true;
   @Input() dropdownZIndex = 2000;
@@ -442,6 +455,7 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
 
   private allowDropdownWasTrue = false;
   private suppressEvents = false;
+  private lastActiveCountry: CountryCode | null = null;
   private themeObserver: MutationObserver | null = null;
   private globalThemeObserver: MutationObserver | null = null;
   private signalConfigSnapshot: string | null = null;
@@ -455,6 +469,79 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   private lastThemeConfig: 'light' | 'dark' | 'auto' | null = null;
 
   isRequired = false;
+
+  // ========== MatFormFieldControl Integration ==========
+  stateChanges = new Subject<void>();
+  focused = false;
+  controlType = 'ngxsmk-tel-input';
+  autofilled = false;
+  userAriaDescribedBy = '';
+
+  get id(): string {
+    return this.resolvedId;
+  }
+
+  get empty(): boolean {
+    return !this.currentRaw();
+  }
+
+  @HostBinding('class.ngxsmk-floating')
+  get shouldLabelFloat(): boolean {
+    return this.focused || !this.empty || !!this.placeholder;
+  }
+
+  get errorState(): boolean {
+    return (this.ngControl?.control?.invalid && (this.ngControl?.touched || this.ngControl?.dirty)) ?? false;
+  }
+
+  @Input()
+  get value(): string | null {
+    const raw = this.currentRaw();
+    return this.stateSignal().e164 || (raw ? raw : null);
+  }
+  set value(val: string | null) {
+    this.writeValue(val);
+    this.stateChanges.next();
+  }
+
+  @Input()
+  get placeholder(): string {
+    return this._placeholder;
+  }
+  set placeholder(plh: string) {
+    this._placeholder = plh || '';
+    this.stateChanges.next();
+  }
+  private _placeholder = '';
+
+  @Input()
+  get required(): boolean {
+    return this.isRequired;
+  }
+  set required(req: boolean) {
+    this.isRequired = req;
+    this.stateChanges.next();
+  }
+
+  @Input()
+  get disabled(): boolean {
+    return this._disabled;
+  }
+  set disabled(val: boolean) {
+    this._disabled = val;
+    if (this.inputRef) this.inputRef.nativeElement.disabled = val;
+    this.applyDisabledUi(val);
+    this.stateChanges.next();
+  }
+  private _disabled = false;
+
+  setDescribedByIds(ids: string[]): void {
+    this.userAriaDescribedBy = ids.join(' ');
+  }
+
+  onContainerClick(event: MouseEvent): void {
+    this.focus();
+  }
 
   private readonly intelligence: PhoneIntelligenceService | null = inject(PhoneIntelligenceService, { optional: true });
 
@@ -624,6 +711,8 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
 
   ngOnDestroy(): void {
     this.isDestroyed = true;
+    this.stateChanges.next();
+    this.stateChanges.complete();
     this.destroyPlugin();
     this.cleanupEventListeners();
     this.cleanupSearchInputListeners();
@@ -708,6 +797,8 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
         errors: validationErrors
       }));
 
+      this.lastActiveCountry = iso2;
+      this.stateChanges.next();
       // Emit inputChange for external listeners (but NOT onChange to avoid loop)
       this.runInZone(() => {
         if (this.isDestroyed) return;
@@ -742,24 +833,6 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
     if (this.isDestroyed) return;
 
     this.disabled = isDisabled;
-
-    if (this.inputRef) this.inputRef.nativeElement.disabled = isDisabled;
-
-    if (this.iti) {
-      if (isDisabled && this.allowDropdown) {
-        this.allowDropdownWasTrue = true;
-        this.allowDropdown = false;
-        this.requestPluginReinit(); // closes popup & removes handlers
-      } else if (!isDisabled && this.allowDropdownWasTrue) {
-        this.allowDropdown = true;
-        this.allowDropdownWasTrue = false;
-        this.requestPluginReinit();
-      } else {
-        this.applyDisabledUi(isDisabled);
-      }
-    } else {
-      this.applyDisabledUi(isDisabled);
-    }
   }
 
   /**
@@ -928,6 +1001,7 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
     if (!this.isDestroyed) {
       (this.inputRef.nativeElement as HTMLElement).style.setProperty('--tel-dd-z', String(this.dropdownZIndex));
       this.applyDisabledUi(this.disabled);
+      this.lastActiveCountry = this.currentIso2();
     }
   }
 
@@ -953,6 +1027,7 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
         this.handleInput();
       }
       this.applyDisabledUi(this.disabled);
+      this.lastActiveCountry = this.currentIso2();
     }
   }
 
@@ -1071,17 +1146,42 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
       const countryChangeHandler = () => {
         if (this.isDestroyed || this.suppressEvents) return;
 
-        const iso2 = this.currentIso2();
+        const newIso2 = this.currentIso2();
+        const oldIso2 = this.lastActiveCountry;
+
+        if (oldIso2 && oldIso2 !== newIso2) {
+          try {
+            const oldDial = getCountryCallingCode(oldIso2);
+            const newDial = getCountryCallingCode(newIso2);
+
+            if (oldDial === newDial) {
+              const rawValue = this.currentRaw();
+              const digits = this.stripLeadingZero(this.toNSN(rawValue));
+              // If the digits typed so far are less than 3, we cannot determine the area code.
+              // We should prevent switching countries that share the same dialing code (like NANP +1 countries).
+              if (digits.length < 3) {
+                this.suppressEvents = true;
+                this.iti?.setCountry(oldIso2.toLowerCase());
+                this.suppressEvents = false;
+                return;
+              }
+            }
+          } catch (e) {
+            // Ignore if getCountryCallingCode throws (e.g. for invalid country codes)
+          }
+        }
+
+        this.lastActiveCountry = newIso2;
 
         // Update state signal
         this.stateSignal.update(state => ({
           ...state,
-          iso2
+          iso2: newIso2
         }));
 
         this.runInZone(() => {
           if (this.isDestroyed) return;
-          const changeEvent = { iso2 };
+          const changeEvent = { iso2: newIso2 };
 
           // Emit both traditional and signal-based outputs
           this.countryChange.emit(changeEvent);
@@ -1112,6 +1212,9 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   onBlur() {
+    this.focused = false;
+    this.stateChanges.next();
+
     if (this.isDestroyed) return;
 
     this.touched = true;
@@ -1146,6 +1249,9 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
   }
 
   onFocus() {
+    this.focused = true;
+    this.stateChanges.next();
+
     if (this.isDestroyed || !this.selectOnFocus || !this.inputRef) return;
 
     const el = this.inputRef.nativeElement;
@@ -1207,7 +1313,9 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
     // Batch zone operations and emissions
     this.runInZone(() => {
       if (this.isDestroyed) return;
-      this.onChange(parsed.e164);
+      // Propagate raw value if invalid but not empty to prevent Angular's Validators.required from raising
+      // a required error when the field is physically populated. Propagate null if completely empty.
+      this.onChange(parsed.e164 || (rawValue ? rawValue : null));
 
       const changeEvent = { raw: rawValue, e164: parsed.e164, iso2 };
 
@@ -1612,7 +1720,19 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
 
     const handleMousedown = (e: Event) => e.preventDefault();
     const handlePaste = () => {
-      setTimeout(updateClearButton, 0);
+      setTimeout(() => {
+        sanitizeSearchInput();
+        updateClearButton();
+      }, 0);
+    };
+
+    // Sanitize search input by removing any "+" characters to allow dial code matching (e.g. "+91" becomes "91")
+    const sanitizeSearchInput = () => {
+      if (searchInput.value.includes('+')) {
+        searchInput.value = searchInput.value.replace(/\+/g, '');
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        searchInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+      }
     };
 
     // Add event listeners and track cleanup functions
@@ -1626,8 +1746,14 @@ export class NgxsmkTelInputComponent implements OnInit, AfterViewInit, OnChanges
     searchInput.addEventListener('input', updateClearButton);
     this.searchInputCleanupFunctions.push(() => searchInput.removeEventListener('input', updateClearButton));
 
+    searchInput.addEventListener('input', sanitizeSearchInput);
+    this.searchInputCleanupFunctions.push(() => searchInput.removeEventListener('input', sanitizeSearchInput));
+
     searchInput.addEventListener('keyup', updateClearButton);
     this.searchInputCleanupFunctions.push(() => searchInput.removeEventListener('keyup', updateClearButton));
+
+    searchInput.addEventListener('keyup', sanitizeSearchInput);
+    this.searchInputCleanupFunctions.push(() => searchInput.removeEventListener('keyup', sanitizeSearchInput));
 
     searchInput.addEventListener('focus', updateClearButton);
     this.searchInputCleanupFunctions.push(() => searchInput.removeEventListener('focus', updateClearButton));

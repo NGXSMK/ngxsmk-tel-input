@@ -1,6 +1,6 @@
 {
   "name": "ngxsmk-tel-input",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Angular international telephone input (intl-tel-input UI + libphonenumber-js validation). ControlValueAccessor. SSR-safe.",
   "license": "MIT",
   "sideEffects": false,
@@ -9,15 +9,15 @@
   "author": {
     "name": "Sachin Dilshan",
     "email": "sachindilshan040@gmail.com",
-    "url": "https://github.com/toozuuu"
+    "url": "https://github.com/NGXSMK"
   },
-  "homepage": "https://github.com/toozuuu/ngxsmk-tel-input#readme",
+  "homepage": "https://github.com/NGXSMK/ngxsmk-tel-input#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/toozuuu/ngxsmk-tel-input.git"
+    "url": "git+https://github.com/NGXSMK/ngxsmk-tel-input.git"
   },
   "bugs": {
-    "url": "https://github.com/toozuuu/ngxsmk-tel-input/issues"
+    "url": "https://github.com/NGXSMK/ngxsmk-tel-input/issues"
   },
 
   "keywords": [
@@ -49,9 +49,15 @@
     "@angular/common": ">=17",
     "@angular/core": ">=17",
     "@angular/forms": ">=17",
+    "@angular/material": ">=17",
     "rxjs": ">=7.8.0",
     "intl-tel-input": "^25.3.2",
     "libphonenumber-js": "^1.12.10 || ^1.12.11"
+  },
+  "peerDependenciesMeta": {
+    "@angular/material": {
+      "optional": true
+    }
   },
   "dependencies": {
     "tslib": "^2.3.0"

@@ -7,7 +7,7 @@ Wraps [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input) for the UI 
 
 ## Try it live on StackBlitz
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/~/github.com/toozuuu/ngxsmk-tel-input)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/~/github.com/NGXSMK/ngxsmk-tel-input)
 
 ---
 
@@ -262,6 +262,7 @@ Arabic + RTL example
 | `selectOnFocus`        | `boolean`                                   | `false`                 | Select all text on focus.                                                                  |
 | `formatWhenValid`      | `'off' \| 'blur' \| 'typing'`               | `'typing'`              | When to format the display value.                                                          |
 | `showErrorWhenTouched` | `boolean`                                   | `true`                  | Show error styles only after blur.                                                         |
+| `showErrorMsg`         | `boolean`                                   | `true`                  | Show component's internal validation error message text.                                   |
 | `dropdownAttachToBody` | `boolean`                                   | `true`                  | Attach dropdown to `<body>` (avoids clipping/overflow).                                    |
 | `dropdownZIndex`       | `number`                                    | `2000`                  | Z‑index for dropdown panel.                                                                |
 | `i18n`                 | `IntlTelI18n`                               | —                       | Localize dropdown/search/ARIA labels.                                                      |

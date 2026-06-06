@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { PLATFORM_ID } from '@angular/core';
+import { PLATFORM_ID, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsmkTelInputComponent } from './ngxsmk-tel-input.component';
 import { NgxsmkTelInputService } from './ngxsmk-tel-input.service';
 import { CountryCode } from 'libphonenumber-js';
@@ -468,6 +470,20 @@ describe('NgxsmkTelInputComponent', () => {
       expect(component.excludeCountriesSignal()).toEqual(['MX']);
     });
 
+    it('should support cssClass input and signal and apply them to input class list', () => {
+      fixture.componentRef.setInput('cssClass', 'tailwind-class-1');
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector('input');
+      expect(input.className).toContain('tailwind-class-1');
+
+      fixture.componentRef.setInput('cssClassSignal', 'tailwind-class-2');
+      fixture.detectChanges();
+      expect(input.className).toContain('tailwind-class-2');
+      expect(input.className).not.toContain('tailwind-class-1');
+    });
+
+
+
     it('should support searchPlaceholder input and signal', fakeAsync(() => {
       component.searchPlaceholder = 'Find...';
       expect(component.searchPlaceholder).toBe('Find...');
@@ -545,4 +561,79 @@ describe('NgxsmkTelInputComponent', () => {
       }
     }));
   });
+
+  describe('MatFormFieldControl Integration', () => {
+    it('should implement MatFormFieldControl contract properties', () => {
+      expect(component.controlType).toBe('ngxsmk-tel-input');
+      expect(component.id).toBeDefined();
+      expect(component.empty).toBeTrue();
+      expect(component.shouldLabelFloat).toBeFalse();
+      expect(component.errorState).toBeFalse();
+    });
+
+    it('should emit stateChanges when values change', () => {
+      const spy = jasmine.createSpy('stateChanges');
+      const sub = component.stateChanges.subscribe(spy);
+
+      component.value = '+12025551234';
+      expect(spy).toHaveBeenCalled();
+
+      component.placeholder = 'New placeholder';
+      expect(spy).toHaveBeenCalled();
+
+      component.required = true;
+      expect(spy).toHaveBeenCalled();
+
+      component.disabled = true;
+      expect(spy).toHaveBeenCalled();
+
+      sub.unsubscribe();
+    });
+
+    it('should handle setDescribedByIds and onContainerClick', () => {
+      component.setDescribedByIds(['id1', 'id2']);
+      expect(component.userAriaDescribedBy).toBe('id1 id2');
+
+      const spy = spyOn(component, 'focus');
+      component.onContainerClick(new MouseEvent('click'));
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should render inside mat-form-field without throwing errors', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [
+          TestMatFormFieldWrapperComponent,
+          NoopAnimationsModule
+        ],
+        providers: [NgxsmkTelInputService]
+      });
+
+      const wrapperFixture = TestBed.createComponent(TestMatFormFieldWrapperComponent);
+      expect(() => {
+        wrapperFixture.detectChanges();
+      }).not.toThrow();
+
+      const wrapperEl = wrapperFixture.nativeElement;
+      const matFormField = wrapperEl.querySelector('mat-form-field');
+      expect(matFormField).toBeTruthy();
+
+      const telInput = wrapperEl.querySelector('ngxsmk-tel-input');
+      expect(telInput).toBeTruthy();
+    });
+  });
 });
+
+@Component({
+  template: `
+    <mat-form-field>
+      <ngxsmk-tel-input [formControl]="phoneControl" placeholder="Enter phone"></ngxsmk-tel-input>
+    </mat-form-field>
+  `,
+  standalone: true,
+  imports: [MatFormFieldModule, NgxsmkTelInputComponent, ReactiveFormsModule]
+})
+class TestMatFormFieldWrapperComponent {
+  phoneControl = new FormControl('');
+}
+

@@ -2,9 +2,32 @@
 
 The `ngxsmk-tel-input` component supports multiple theme variants for popular Angular UI libraries.
 
-## Angular Material Theme
+## Angular Material Theme & MatFormField Integration
 
-### Installation
+The component implements `MatFormFieldControl`, allowing it to be used natively inside Angular Material `<mat-form-field>` components.
+
+### Usage in `<mat-form-field>`
+
+To use the telephone input inside a `<mat-form-field>` wrapper:
+
+1. Import `MatFormFieldModule` and `MatInputModule` (or animations module) in your component or module.
+2. Place `<ngxsmk-tel-input>` directly inside `<mat-form-field>`.
+3. Wrap it with `<mat-label>` and `<mat-error>` as standard Angular Material fields.
+
+```html
+<mat-form-field appearance="outline" style="width: 100%;">
+  <mat-label>Phone Number</mat-label>
+  <ngxsmk-tel-input
+    [formControl]="phoneControl"
+    placeholder="Enter phone number">
+  </ngxsmk-tel-input>
+  <mat-error>Please enter a valid phone number</mat-error>
+</mat-form-field>
+```
+
+### Standalone Installation (Non-Wrapper)
+
+If you are not wrapping the component in a `<mat-form-field>` but want the traditional standalone Material look:
 
 1. Import the Material theme styles:
 
