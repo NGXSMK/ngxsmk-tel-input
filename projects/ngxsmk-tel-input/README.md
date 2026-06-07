@@ -33,7 +33,7 @@ Wraps [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input) for the UI 
 
 ## Requirements
 
-* Angular **17+** (actively tested on Angular 19)
+* Angular **17+** (actively tested on Angular 19 - 22)
 * Node **18** or **20**
 
 > Library `peerDependencies` target Angular `>=17`.
@@ -423,4 +423,4 @@ Clear `.angular/cache`, rebuild the lib, and restart `ng serve`.
 * UI powered by [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input)
 * Parsing & validation by [`libphonenumber-js`](https://github.com/catamphetamine/libphonenumber-js)
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07

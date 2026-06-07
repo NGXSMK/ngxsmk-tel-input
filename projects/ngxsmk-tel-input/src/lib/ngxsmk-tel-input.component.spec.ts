@@ -444,7 +444,7 @@ describe('NgxsmkTelInputComponent', () => {
     });
   });
 
-  describe('Ionic & Angular 19+ Optimizations', () => {
+  describe('Ionic & Angular 19-22+ Optimizations', () => {
     it('should dynamically inject NgControl if present', () => {
       // By default in simple TestBed configuration without forms directives, ngControl is null but doesn't crash
       expect(component.ngControl).toBeNull();
