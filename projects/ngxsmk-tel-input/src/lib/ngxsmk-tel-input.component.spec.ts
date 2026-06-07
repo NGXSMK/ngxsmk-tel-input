@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { PLATFORM_ID, Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { PLATFORM_ID, Component, forwardRef } from '@angular/core';
+import { FormControl, ReactiveFormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsmkTelInputComponent } from './ngxsmk-tel-input.component';
@@ -638,6 +638,45 @@ describe('NgxsmkTelInputComponent', () => {
       expect(telInput).toBeTruthy();
     });
   });
+
+  describe('Form Integration and DI fixes', () => {
+    it('should submit closest form on Enter keypress', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TestFormSubmissionComponent],
+        providers: [NgxsmkTelInputService]
+      });
+
+      const wrapperFixture = TestBed.createComponent(TestFormSubmissionComponent);
+      wrapperFixture.detectChanges();
+
+      const componentInstance = wrapperFixture.componentInstance;
+      const submitSpy = spyOn(componentInstance, 'onSubmit').and.callThrough();
+
+      const inputEl = wrapperFixture.nativeElement.querySelector('input');
+      expect(inputEl).toBeTruthy();
+
+      const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+      inputEl.dispatchEvent(event);
+      wrapperFixture.detectChanges();
+
+      expect(submitSpy).toHaveBeenCalled();
+      expect(componentInstance.submitted).toBeTrue();
+    });
+
+    it('should not throw runtime error when nested under a CVA component that uses formControl', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TestParentControlComponent],
+        providers: [NgxsmkTelInputService]
+      });
+
+      expect(() => {
+        const wrapperFixture = TestBed.createComponent(TestParentControlComponent);
+        wrapperFixture.detectChanges();
+      }).not.toThrow();
+    });
+  });
 });
 
 @Component({
@@ -651,5 +690,51 @@ describe('NgxsmkTelInputComponent', () => {
 })
 class TestMatFormFieldWrapperComponent {
   phoneControl = new FormControl('');
+}
+
+@Component({
+  template: `
+    <form (submit)="onSubmit($event)">
+      <ngxsmk-tel-input></ngxsmk-tel-input>
+    </form>
+  `,
+  standalone: true,
+  imports: [NgxsmkTelInputComponent]
+})
+class TestFormSubmissionComponent {
+  submitted = false;
+  onSubmit(event: Event) {
+    event.preventDefault();
+    this.submitted = true;
+  }
+}
+
+@Component({
+  selector: 'wrapper-cva',
+  template: `<ngxsmk-tel-input></ngxsmk-tel-input>`,
+  standalone: true,
+  imports: [NgxsmkTelInputComponent],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => WrapperCvaComponent),
+      multi: true
+    }
+  ]
+})
+class WrapperCvaComponent implements ControlValueAccessor {
+  writeValue(obj: any): void {}
+  registerOnChange(fn: any): void {}
+  registerOnTouched(fn: any): void {}
+  setDisabledState?(isDisabled: boolean): void {}
+}
+
+@Component({
+  template: `<wrapper-cva [formControl]="control"></wrapper-cva>`,
+  standalone: true,
+  imports: [WrapperCvaComponent, ReactiveFormsModule]
+})
+class TestParentControlComponent {
+  control = new FormControl('');
 }
 

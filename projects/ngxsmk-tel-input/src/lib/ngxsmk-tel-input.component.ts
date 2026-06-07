@@ -170,6 +170,7 @@ interface BeforeInputEvent extends Event {
             [attr.aria-errormessage]="showError() && resolvedErrorText() && (showErrorMsgSignal() ?? showErrorMsg) ? resolvedId + '-error' : null"
             (blur)="onBlur()"
             (focus)="onFocus()"
+            (keydown.enter)="onEnterPressed($event)"
           />
         </div>
 
@@ -233,7 +234,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, 
   isNativelyDisabled = false;
 
   ngOnInit(): void {
-    this.ngControl = this.injector.get(NgControl, null);
+    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true } as any);
   }
 
   ngDoCheck(): void {
@@ -1285,6 +1286,18 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, 
         }
       }
     });
+  }
+
+  onEnterPressed(event: Event) {
+    if (this.isDestroyed) return;
+    const form = this.hostElementRef.nativeElement.closest('form');
+    if (form) {
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
   }
 
   private handleInput() {

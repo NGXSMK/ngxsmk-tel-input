@@ -77,7 +77,7 @@ function addDependencies(): Rule {
     }
 
     // Add required dependencies
-    packageJsonContent.dependencies['ngxsmk-tel-input'] = '^1.8.2';
+    packageJsonContent.dependencies['ngxsmk-tel-input'] = '^1.8.3';
     packageJsonContent.dependencies['intl-tel-input'] = '^25.3.2';
     packageJsonContent.dependencies['libphonenumber-js'] = '^1.12.11';
 
