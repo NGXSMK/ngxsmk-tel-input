@@ -53,7 +53,7 @@
     "typescript"
   ],
   "scripts": {
-    "ng": "ng",
+    "ng": "ng", 
     "start": "ng serve demo",
     "build": "ng build",
     "build:lib": "ng build ngxsmk-tel-input",

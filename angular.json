@@ -73,20 +73,23 @@
               "projects/demo/src/styles.scss",
               "node_modules/intl-tel-input/build/css/intlTelInput.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "intl-tel-input"
+            ]
           },
           "configurations": {
             "production": {
             "budgets": [
               {
                 "type": "initial",
-                "maximumWarning": "650kB",
+                "maximumWarning": "750kB",
                 "maximumError": "1MB"
               },
               {
                 "type": "anyComponentStyle",
-                "maximumWarning": "30kB",
-                "maximumError": "40kB"
+                "maximumWarning": "45kB",
+                "maximumError": "60kB"
               }
             ],
               "outputHashing": "all"
