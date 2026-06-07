@@ -12,6 +12,12 @@
   --tel-radius: var(--ion-border-radius, 12px);
   --tel-focus-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb, 37, 99, 235), .15);
 
+  /* Disabled State Tokens */
+  --tel-disabled-bg: var(--bs-secondary-bg, #f1f5f9);
+  --tel-disabled-fg: var(--bs-secondary-color, #94a3b8);
+  --tel-disabled-border: var(--bs-border-color, #cbd5e1);
+  --tel-disabled-opacity: 1;
+
   --tel-dd-bg: var(--ion-background-color, #fff);
   --tel-dd-border: var(--ion-border-color, rgba(0, 0, 0, 0.08));
   --tel-dd-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -41,6 +47,11 @@
   --tel-warning: #fbbf24;
   --tel-focus-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
 
+  /* Disabled State Tokens - Dark Mode */
+  --tel-disabled-bg: var(--bs-secondary-bg, #1e293b);
+  --tel-disabled-fg: var(--bs-secondary-color, #64748b);
+  --tel-disabled-border: var(--bs-border-color, #334155);
+
   --tel-dd-bg: #1e293b;
   --tel-dd-border: rgba(255, 255, 255, 0.08);
   --tel-dd-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -59,6 +70,12 @@
   --tel-success: #10b981 !important;
   --tel-warning: #f59e0b !important;
   --tel-focus-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+
+  /* Disabled State Tokens - Light Mode Override */
+  --tel-disabled-bg: var(--bs-secondary-bg, #f1f5f9) !important;
+  --tel-disabled-fg: var(--bs-secondary-color, #94a3b8) !important;
+  --tel-disabled-border: var(--bs-border-color, #cbd5e1) !important;
+  --tel-disabled-opacity: 1 !important;
 
   --tel-dd-bg: #fff !important;
   --tel-dd-border: rgba(0, 0, 0, 0.08) !important;
@@ -135,14 +152,14 @@
 
 .ngxsmk-tel.disabled,
 .ngxsmk-tel:has(input:disabled) {
-  opacity: .7;
+  opacity: var(--tel-disabled-opacity);
   cursor: not-allowed;
 }
 
 .ngxsmk-tel-input__control:disabled {
-  background-color: #f1f5f9;
-  color: #94a3b8;
-  border-color: #cbd5e1;
+  background-color: var(--tel-disabled-bg);
+  color: var(--tel-disabled-fg);
+  border-color: var(--tel-disabled-border);
   cursor: not-allowed;
 }
 
@@ -719,9 +736,9 @@
 
 :host-context(.dark):not([data-theme="light"]) .ngxsmk-tel-input__control:disabled,
 :host([data-theme="dark"]) .ngxsmk-tel-input__control:disabled {
-  background-color: #1e293b !important;
-  color: #64748b !important;
-  border-color: #334155 !important;
+  background-color: var(--tel-disabled-bg) !important;
+  color: var(--tel-disabled-fg) !important;
+  border-color: var(--tel-disabled-border) !important;
   box-shadow: none !important;
 }
 
@@ -815,6 +832,13 @@
   color: #0f172a !important;
   border-color: #2563eb !important;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+:host([data-theme="light"]) .ngxsmk-tel-input__control:disabled {
+  background-color: var(--tel-disabled-bg) !important;
+  color: var(--tel-disabled-fg) !important;
+  border-color: var(--tel-disabled-border) !important;
+  box-shadow: none !important;
 }
 
 :host([data-theme="light"]) .ngxsmk-tel-input__control::placeholder {

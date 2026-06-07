@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-06-07
+
+### Added
+- **Customizable Disabled State Design Tokens**: Introduced CSS custom properties (`--tel-disabled-bg`, `--tel-disabled-fg`, `--tel-disabled-border`, and `--tel-disabled-opacity`) mapping to Bootstrap's standard input disabled state variables (`--bs-secondary-bg`, `--bs-secondary-color`, `--bs-border-color`) when present.
+
+### Fixed
+- **Disabled State Color Variation & Double-Opacity**: Fixed cumulative/double opacity fading (wrapper `opacity` now defaults to `1` via `--tel-disabled-opacity`) and hardcoded background/border gray colors on disabled state to match the host application's regular input elements.
+
 ## [1.8.1] - 2026-06-06
 
 ### Added

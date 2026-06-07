@@ -1,6 +1,6 @@
 {
   "name": "ngxsmk-tel-input",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Angular international telephone input (intl-tel-input UI + libphonenumber-js validation). ControlValueAccessor. SSR-safe.",
   "license": "MIT",
   "sideEffects": false,
