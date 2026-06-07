@@ -124,10 +124,9 @@ describe('NgxsmkTelInputComponent', () => {
 
     it('should detect when input is natively disabled (e.g. by parent fieldset)', () => {
       const inputEl = component.inputRef.nativeElement;
-      spyOn(inputEl, 'matches').and.callFake((selector) => {
-        if (selector === ':disabled') return true;
-        return false;
-      });
+      spyOn(inputEl, 'matches').and.callFake(((selector: string) => {
+        return selector === ':disabled';
+      }) as any);
 
       expect(component.isNativelyDisabled).toBe(false);
       
