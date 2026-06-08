@@ -508,4 +508,4 @@ Clear `.angular/cache`, rebuild the lib, and restart `ng serve`.
 * UI powered by [`intl-tel-input`](https://github.com/jackocnr/intl-tel-input)
 * Parsing & validation by [`libphonenumber-js`](https://github.com/catamphetamine/libphonenumber-js)
 
-Last updated: 2026-06-07
+Last updated: 2026-06-08

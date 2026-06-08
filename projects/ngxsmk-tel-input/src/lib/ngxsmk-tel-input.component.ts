@@ -26,6 +26,8 @@ import {
   HostBinding,
   Injector,
   DoCheck,
+  Self,
+  AfterContentInit,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
@@ -206,15 +208,12 @@ interface BeforeInputEvent extends Event {
   `,
   styleUrls: ['./ngxsmk-tel-input.component.scss'],
   providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
-    { provide: NG_VALIDATORS, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
     { provide: MatFormFieldControl, useExisting: forwardRef(() => NgxsmkTelInputComponent) }
   ]
 })
-export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
+export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
   @ViewChild('telInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
-  private readonly injector = inject(Injector);
   ngControl: NgControl | null = null;
 
   @HostBinding('class.ion-touched') get ionTouched() { return this.ngControl?.touched ?? false; }
@@ -233,8 +232,16 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, 
 
   isNativelyDisabled = false;
 
-  ngOnInit(): void {
-    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true } as any);
+  ngOnInit(): void {}
+
+  ngAfterContentInit(): void {
+    if (this.ngControl) {
+      const control = this.ngControl.control;
+      if (control) {
+        control.addValidators((ctrl) => this.validate(ctrl));
+        control.updateValueAndValidity({ emitEvent: false });
+      }
+    }
   }
 
   ngDoCheck(): void {
@@ -566,8 +573,13 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, 
   constructor(
     @Optional() private readonly zone: NgZone | null,
     private readonly tel: NgxsmkTelInputService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    @Self() @Optional() ngControl: NgControl
   ) {
+    this.ngControl = ngControl;
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
+    }
     // Watch for theme signal changes
     effect(() => {
       if (!isPlatformBrowser(this.platformId) || this.isDestroyed) return;
@@ -1290,6 +1302,19 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterViewInit, 
 
   onEnterPressed(event: Event) {
     if (this.isDestroyed) return;
+
+    this.touched = true;
+    this.stateSignal.update(state => ({
+      ...state,
+      touched: true
+    }));
+
+    this.runInZone(() => {
+      this.onTouchedCb();
+      this.validatorChange?.();
+    });
+    this.cdr.markForCheck();
+
     const form = this.hostElementRef.nativeElement.closest('form');
     if (form) {
       if (typeof form.requestSubmit === 'function') {

@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.3] - 2026-06-08
+## [1.8.4] - 2026-06-08
 
 ### Fixed
-- **Form Submission on Enter**: Handled Enter keypress inside the input to programmatically request submission on the closest form, bypassing browser-implicit submission blocks caused by the nested search input in the dropdown.
-- **Value Accessor DI Conflict**: Limited the `NgControl` dependency injection lookup to the component's own element injector (`{ self: true }`), resolving runtime "No value accessor" errors when nested under wrapper components that also implement `ControlValueAccessor`.
+- **Value Accessor DI Conflict (NG01203)**: Removed duplicate `NG_VALUE_ACCESSOR` and `NG_VALIDATORS` providers from component metadata, and refactored the component to manually inject `NgControl` and assign `valueAccessor = this` inside the constructor. This completely resolves runtime circular dependency and "No value accessor" errors across template-driven and reactive forms.
+- **Form Touched State on Enter**: Programmatically marked the control as `touched` when the form is submitted via Enter keypress, ensuring the touched state is correctly set to true on the first submission.
 
 ## [1.8.2] - 2026-06-07
 
