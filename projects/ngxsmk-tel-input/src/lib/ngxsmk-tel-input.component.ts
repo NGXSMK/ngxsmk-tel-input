@@ -208,6 +208,7 @@ interface BeforeInputEvent extends Event {
   `,
   styleUrls: ['./ngxsmk-tel-input.component.scss'],
   providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
     { provide: MatFormFieldControl, useExisting: forwardRef(() => NgxsmkTelInputComponent) }
   ]
 })
@@ -215,6 +216,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   @ViewChild('telInput', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   ngControl: NgControl | null = null;
+  private readonly injector = inject(Injector);
+  private initialized = false;
 
   @HostBinding('class.ion-touched') get ionTouched() { return this.ngControl?.touched ?? false; }
   @HostBinding('class.ion-untouched') get ionUntouched() { return this.ngControl?.untouched ?? false; }
@@ -232,7 +235,9 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
 
   isNativelyDisabled = false;
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.ngControl = this.injector.get(NgControl, null);
+  }
 
   ngAfterContentInit(): void {
     if (this.ngControl) {
@@ -593,13 +598,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   constructor(
     @Optional() private readonly zone: NgZone | null,
     private readonly tel: NgxsmkTelInputService,
-    private readonly cdr: ChangeDetectorRef,
-    @Self() @Optional() ngControl: NgControl
+    private readonly cdr: ChangeDetectorRef
   ) {
-    this.ngControl = ngControl;
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
-    }
     // Watch for theme signal changes
     effect(() => {
       if (!isPlatformBrowser(this.platformId) || this.isDestroyed) return;
@@ -727,6 +727,12 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
         if (!this.isDestroyed) this.focus();
       });
     }
+
+    setTimeout(() => {
+      if (!this.isDestroyed) {
+        this.initialized = true;
+      }
+    }, 50);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -1058,6 +1064,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     const prevIso2 = (this.iti?.getSelectedCountryData?.().iso2 || this.initialCountry || 'US').toString().toLowerCase();
     const prevValue = this.currentRaw();
 
+    this.initialized = false;
     this.cleanupEventListeners();
     this.destroyPlugin();
     await this.initIntlTelInput();
@@ -1076,6 +1083,12 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
       }
       this.applyDisabledUi(this.disabled);
       this.lastActiveCountry = this.currentIso2();
+
+      setTimeout(() => {
+        if (!this.isDestroyed) {
+          this.initialized = true;
+        }
+      }, 50);
     }
   }
 
@@ -1260,6 +1273,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   }
 
   onBlur() {
+    if (!this.initialized) return;
     if (this.reinitInProgress) return;
     const wasFocused = this.focused;
     this.focused = false;
@@ -1301,6 +1315,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   }
 
   onFocus() {
+    if (!this.initialized) return;
     this.focused = true;
     this.stateChanges.next();
 
@@ -1341,11 +1356,14 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     });
     this.cdr.markForCheck();
 
+    // Try to submit the native form
     const form = this.hostElementRef.nativeElement.closest('form');
     if (form) {
-      const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]') as HTMLElement | null;
+      const submitBtn = form.querySelector('button:not([type]), button[type="submit"], input[type="submit"]') as HTMLElement | null;
       if (submitBtn) {
-        submitBtn.click();
+        if (!submitBtn.matches(':disabled')) {
+          submitBtn.click();
+        }
       } else {
         const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
         form.dispatchEvent(submitEvent);
