@@ -342,16 +342,29 @@
   .ngxsmk-tel[data-size="sm"] ::ng-deep .iti__country-list {
     .iti__search-input {
       font-size: 12px !important;
-      padding: 6px 28px 6px 10px !important;
+      padding: 6px 28px 6px 28px !important;
       margin: 6px !important;
       width: calc(100% - 12px) !important;
       border-radius: 6px !important;
+    }
+
+    .iti__search-icon {
+      inset-inline-start: 14px !important;
+      inset-inline-end: auto !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+    }
+
+    .iti__search-icon-svg {
+      width: 12px !important;
+      height: 12px !important;
     }
     
     .iti__search-clear {
       width: 20px !important;
       height: 20px !important;
-      right: 10px !important;
+      inset-inline-end: 14px !important;
+      inset-inline-start: auto !important;
       
       svg {
         width: 10px;
@@ -384,16 +397,29 @@
   .ngxsmk-tel[data-size="lg"] ::ng-deep .iti__country-list {
     .iti__search-input {
       font-size: 15px !important;
-      padding: 10px 36px 10px 14px !important;
+      padding: 10px 42px 10px 42px !important;
       margin: 10px !important;
       width: calc(100% - 20px) !important;
       border-radius: 10px !important;
+    }
+
+    .iti__search-icon {
+      inset-inline-start: 22px !important;
+      inset-inline-end: auto !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+    }
+
+    .iti__search-icon-svg {
+      width: 16px !important;
+      height: 16px !important;
     }
     
     .iti__search-clear {
       width: 28px !important;
       height: 28px !important;
-      right: 16px !important;
+      inset-inline-end: 22px !important;
+      inset-inline-start: auto !important;
       
       svg {
         width: 14px;
@@ -560,7 +586,7 @@
   position: sticky;
   top: 0;
   margin: 8px;
-  padding: 8px 32px 8px 12px;
+  padding: 8px 36px 8px 36px !important;
   width: calc(100% - 16px);
   border: 1px solid var(--tel-border);
   border-radius: 8px;
@@ -583,10 +609,31 @@
   position: relative;
 }
 
+/* Search icon for search input */
+:host ::ng-deep .iti__search-icon {
+  position: absolute;
+  inset-inline-start: 18px !important;
+  inset-inline-end: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex;
+  pointer-events: none;
+  z-index: 10;
+}
+
+:host ::ng-deep .iti__search-icon-svg {
+  stroke: var(--tel-placeholder) !important;
+  fill: none;
+  stroke-width: 3;
+  width: 14px;
+  height: 14px;
+}
+
 /* Clear button for search input */
 :host ::ng-deep .iti__search-clear {
   position: absolute;
-  right: 14px;
+  inset-inline-end: 18px !important;
+  inset-inline-start: auto !important;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -1056,14 +1103,16 @@
   }
 
   :host ::ng-deep .iti__search-input {
-    padding-right: 36px !important;
+    padding-inline-start: 36px !important;
+    padding-inline-end: 36px !important;
   }
 
   :host ::ng-deep .iti__search-clear {
     width: 28px !important;
     height: 28px !important;
     font-size: 20px !important;
-    right: 6px !important;
+    inset-inline-end: 14px !important;
+    inset-inline-start: auto !important;
   }
 
   :host ::ng-deep .iti__country {
@@ -1110,7 +1159,8 @@
 
   :host ::ng-deep .iti__search-input {
     font-size: 16px !important;
-    padding: 12px 14px;
+    padding-block: 12px;
+    padding-inline: 36px !important;
     min-height: 44px;
     width: 100% !important;
     box-sizing: border-box;
@@ -1229,14 +1279,16 @@
   }
 
   :host ::ng-deep .iti__search-input {
-    padding-right: 36px !important;
+    padding-inline-start: 36px !important;
+    padding-inline-end: 36px !important;
   }
 
   :host ::ng-deep .iti__search-clear {
     width: 24px !important;
     height: 24px !important;
     font-size: 18px !important;
-    right: 6px !important;
+    inset-inline-end: 14px !important;
+    inset-inline-start: auto !important;
   }
 
   :host ::ng-deep .iti__country {
@@ -1275,7 +1327,8 @@
 
   :host ::ng-deep .iti__search-input {
     font-size: 16px !important;
-    padding: 10px 12px;
+    padding-block: 10px;
+    padding-inline: 36px !important;
     min-height: 44px;
   }
 
