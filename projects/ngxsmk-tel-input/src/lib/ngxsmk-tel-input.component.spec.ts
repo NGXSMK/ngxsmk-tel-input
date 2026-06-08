@@ -110,8 +110,18 @@ describe('NgxsmkTelInputComponent', () => {
       const callback = jasmine.createSpy('onTouched');
       component.registerOnTouched(callback);
       
+      component.focused = true;
       component.onBlur();
       expect(callback).toHaveBeenCalled();
+    });
+
+    it('should not mark control as touched on blur if not previously focused', () => {
+      const callback = jasmine.createSpy('onTouched');
+      component.registerOnTouched(callback);
+      
+      component.focused = false;
+      component.onBlur();
+      expect(callback).not.toHaveBeenCalled();
     });
 
     it('should set disabled state', () => {
@@ -189,7 +199,7 @@ describe('NgxsmkTelInputComponent', () => {
       expect(errors).toBeNull();
     });
 
-    it('should emit validityChange when validity changes', () => {
+    it('should emit validityChange when validity changes', fakeAsync(() => {
       spyOn(component.validityChange, 'emit');
       const control = new FormControl('2025551234');
       
@@ -203,8 +213,9 @@ describe('NgxsmkTelInputComponent', () => {
       });
       
       component.validate(control);
+      tick();
       expect(component.validityChange.emit).toHaveBeenCalledWith(true);
-    });
+    }));
   });
 
   describe('Public Methods', () => {

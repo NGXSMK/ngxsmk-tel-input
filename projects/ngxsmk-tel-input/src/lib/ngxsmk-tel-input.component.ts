@@ -254,6 +254,26 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
         this.cdr.markForCheck();
       }
     }
+
+    if (this.ngControl && this.ngControl.control) {
+      const control = this.ngControl.control;
+      try {
+        if (control.validator) {
+          const testControl = { value: null } as AbstractControl;
+          const errors = control.validator(testControl);
+          const req = !!errors?.['required'];
+          if (this.isRequired !== req) {
+            this.isRequired = req;
+            this.stateChanges.next();
+          }
+        } else if (this.isRequired) {
+          this.isRequired = false;
+          this.stateChanges.next();
+        }
+      } catch (error) {
+        this.reportNonCriticalError('validate:required-check', error);
+      }
+    }
   }
 
   // ========== Signal-based API (Angular 17+) ==========
@@ -825,6 +845,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
         errors: validationErrors
       }));
 
+      this.checkAndEmitValidity(parsed.isValid && !parsed.isInvalidInternational);
+
       this.lastActiveCountry = iso2;
       this.stateChanges.next();
       // Emit inputChange for external listeners (but NOT onChange to avoid loop)
@@ -872,22 +894,6 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   validate(control: AbstractControl): ValidationErrors | null {
     if (this.isDestroyed) return null;
 
-    // Update isRequired based on control validators
-    // Check if control has required validator by testing with null value
-    try {
-      if (control.validator) {
-        const testControl = { value: null } as AbstractControl;
-        const errors = control.validator(testControl);
-        this.isRequired = !!errors?.['required'];
-      } else {
-        this.isRequired = false;
-      }
-    } catch (error) {
-      // Fallback to not required if validator check fails
-      this.reportNonCriticalError('validate:required-check', error);
-      this.isRequired = false;
-    }
-
     const raw = this.currentRaw();
     if (!raw) return null;
 
@@ -897,19 +903,21 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     if (valid !== this.lastEmittedValid) {
       this.lastEmittedValid = valid;
 
-      // Update state signal
+      // Defer stateSignal update and output emissions to a microtask to avoid NG0600 during template rendering
       const validationErrors = this.buildValidationErrors(parsed.isValid, parsed.isInvalidInternational);
-      this.stateSignal.update(state => ({
-        ...state,
-        isValid: valid,
-        errors: validationErrors
-      }));
+      Promise.resolve().then(() => {
+        if (!this.isDestroyed) {
+          this.stateSignal.update(state => ({
+            ...state,
+            isValid: valid,
+            errors: validationErrors
+          }));
+          this.validityChange.emit(valid);
+          this.validityChangeSignal.emit(valid);
+          this.cdr.markForCheck();
+        }
+      });
 
-      // Emit both traditional and signal-based outputs
-      this.validityChange.emit(valid);
-      this.validityChangeSignal.emit(valid);
-
-      // Mark for check when validity changes
       this.cdr.markForCheck();
     }
 
@@ -921,6 +929,17 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     }
 
     return null;
+  }
+
+  private checkAndEmitValidity(valid: boolean): void {
+    if (valid !== this.lastEmittedValid) {
+      this.lastEmittedValid = valid;
+      this.runInZone(() => {
+        if (this.isDestroyed) return;
+        this.validityChange.emit(valid);
+        this.validityChangeSignal.emit(valid);
+      });
+    }
   }
 
   /**
@@ -1242,10 +1261,12 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
 
   onBlur() {
     if (this.reinitInProgress) return;
+    const wasFocused = this.focused;
     this.focused = false;
     this.stateChanges.next();
 
     if (this.isDestroyed) return;
+    if (!wasFocused) return;
 
     this.touched = true;
 
@@ -1275,6 +1296,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     const nsn = parsed.e164 ? this.nsnFromE164(parsed.e164, iso2) : digits;
     if (formatWhenValidBlur !== 'typing') {
       this.setInputValue(this.displayValue(nsn, iso2));
+      this.checkAndEmitValidity(parsed.isValid && !parsed.isInvalidInternational);
     }
   }
 
@@ -1305,6 +1327,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   onEnterPressed(event: Event) {
     if (this.isDestroyed) return;
 
+    event.preventDefault();
+
     this.touched = true;
     this.stateSignal.update(state => ({
       ...state,
@@ -1319,10 +1343,23 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
 
     const form = this.hostElementRef.nativeElement.closest('form');
     if (form) {
-      if (typeof form.requestSubmit === 'function') {
-        form.requestSubmit();
+      const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]') as HTMLElement | null;
+      if (submitBtn) {
+        submitBtn.click();
       } else {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+        form.dispatchEvent(submitEvent);
+        if (!submitEvent.defaultPrevented) {
+          try {
+            if (typeof form.requestSubmit === 'function') {
+              form.requestSubmit();
+            } else {
+              form.submit();
+            }
+          } catch (e) {
+            // Ignore
+          }
+        }
       }
     }
   }
@@ -1348,6 +1385,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
       isValid,
       errors: validationErrors
     }));
+
+    this.checkAndEmitValidity(isValid);
 
     // Intelligence features
     if (this.enableIntelligence && this.intelligence && parsed.e164) {
