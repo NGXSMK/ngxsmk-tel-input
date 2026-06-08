@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4-beta.1] - 2026-06-08
+
+### Fixed
+- **Angular Signals NG0600 Error during Reinitialization**: Detached old event listeners (`cleanupEventListeners()`) prior to destroying the `intl-tel-input` instance during component/plugin reinitialization. This prevents DOM-triggered blur event handlers from writing to signals during Angular's effect execution context, and resolves memory leaks.
+
 ## [1.8.4-beta.0] - 2026-06-08
 
 ### Fixed
