@@ -1039,6 +1039,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     const prevIso2 = (this.iti?.getSelectedCountryData?.().iso2 || this.initialCountry || 'US').toString().toLowerCase();
     const prevValue = this.currentRaw();
 
+    this.cleanupEventListeners();
     this.destroyPlugin();
     await this.initIntlTelInput();
     this.bindDomListeners();
@@ -1240,6 +1241,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   }
 
   onBlur() {
+    if (this.reinitInProgress) return;
     this.focused = false;
     this.stateChanges.next();
 
