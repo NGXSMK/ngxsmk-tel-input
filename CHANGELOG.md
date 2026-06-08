@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.4] - 2026-06-08
+## [1.8.4-beta.0] - 2026-06-08
 
 ### Fixed
 - **Value Accessor DI Conflict (NG01203)**: Removed duplicate `NG_VALUE_ACCESSOR` and `NG_VALIDATORS` providers from component metadata, and refactored the component to manually inject `NgControl` and assign `valueAccessor = this` inside the constructor. This completely resolves runtime circular dependency and "No value accessor" errors across template-driven and reactive forms.
