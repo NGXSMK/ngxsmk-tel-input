@@ -5,11 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.8.3] - 2026-06-08
+## [1.8.4] - 2026-06-10
 
 ### Fixed
-- **Form Submission on Enter**: Handled Enter keypress inside the input to programmatically request submission on the closest form, bypassing browser-implicit submission blocks caused by the nested search input in the dropdown.
-- **Value Accessor DI Conflict**: Limited the `NgControl` dependency injection lookup to the component's own element injector (`{ self: true }`), resolving runtime "No value accessor" errors when nested under wrapper components that also implement `ControlValueAccessor`.
+- **No Value Accessor (NG01203)**: Added `ReactiveFormsModule` and `FormsModule` to component imports and `NG_VALUE_ACCESSOR` to `viewProviders` alongside `providers`, ensuring proper resolution for standalone components across all Angular DI scopes.
+- **Touched State During Initialization**: Removed the 50ms `setTimeout` delay on `initialized` flag and eliminated the redundant native blur event listener to prevent race conditions where intl-tel-input plugin events during setup could prematurely mark the field as touched.
+- **Submit on Enter with [formGroup]**: Removed `event.preventDefault()` and manual `setTimeout` submission logic from `onEnterPressed()`. The browser's native Enter key behavior now triggers the submit button click naturally, which correctly fires Angular's `(ngSubmit)` handler.
+
+## [1.8.4-beta.1] - 2026-06-08
+
+### Fixed
+- **Angular Signals NG0600 Error during Reinitialization**: Detached old event listeners (`cleanupEventListeners()`) prior to destroying the `intl-tel-input` instance during component/plugin reinitialization. This prevents DOM-triggered blur event handlers from writing to signals during Angular's effect execution context, and resolves memory leaks.
+
+## [1.8.4-beta.0] - 2026-06-08
+
+### Fixed
+- **Value Accessor DI Conflict (NG01203)**: Removed duplicate `NG_VALUE_ACCESSOR` and `NG_VALIDATORS` providers from component metadata, and refactored the component to manually inject `NgControl` and assign `valueAccessor = this` inside the constructor. This completely resolves runtime circular dependency and "No value accessor" errors across template-driven and reactive forms.
+- **Form Touched State on Enter**: Programmatically marked the control as `touched` when the form is submitted via Enter keypress, ensuring the touched state is correctly set to true on the first submission.
 
 ## [1.8.2] - 2026-06-07
 
