@@ -653,7 +653,7 @@ describe('NgxsmkTelInputComponent', () => {
   });
 
   describe('Form Integration and DI fixes', () => {
-    it('should submit closest form on Enter keypress', () => {
+    it('should submit closest form on Enter keypress', fakeAsync(() => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [TestFormSubmissionComponent],
@@ -671,13 +671,14 @@ describe('NgxsmkTelInputComponent', () => {
 
       const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
       inputEl.dispatchEvent(event);
+      tick();
       wrapperFixture.detectChanges();
 
       expect(submitSpy).toHaveBeenCalled();
       expect(componentInstance.submitted).toBeTrue();
-    });
+    }));
 
-    it('should submit closest form on Enter keypress when using formGroup and formControlName', () => {
+    it('should submit closest form on Enter keypress when using formGroup and formControlName', fakeAsync(() => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [TestFormGroupSubmissionComponent],
@@ -695,11 +696,12 @@ describe('NgxsmkTelInputComponent', () => {
 
       const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
       inputEl.dispatchEvent(event);
+      tick();
       wrapperFixture.detectChanges();
 
       expect(submitSpy).toHaveBeenCalled();
       expect(componentInstance.submitted).toBeTrue();
-    });
+    }));
 
     it('should not throw runtime error when nested under a CVA component that uses formControl', () => {
       TestBed.resetTestingModule();

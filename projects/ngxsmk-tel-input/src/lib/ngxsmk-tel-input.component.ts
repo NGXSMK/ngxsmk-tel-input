@@ -33,8 +33,9 @@ import { isPlatformBrowser } from '@angular/common';
 import {
   AbstractControl,
   ControlValueAccessor,
-  NG_VALIDATORS,
+  FormsModule,
   NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
   ValidationErrors,
   Validator,
   NgControl
@@ -138,7 +139,7 @@ interface BeforeInputEvent extends Event {
 @Component({
   selector: 'ngxsmk-tel-input',
   standalone: true,
-  imports: [],
+  imports: [ReactiveFormsModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
       <div class="ngxsmk-tel"
@@ -172,7 +173,7 @@ interface BeforeInputEvent extends Event {
             [attr.aria-errormessage]="showError() && resolvedErrorText() && (showErrorMsgSignal() ?? showErrorMsg) ? resolvedId + '-error' : null"
             (blur)="onBlur()"
             (focus)="onFocus()"
-            (keydown.enter)="onEnterPressed($event)"
+            (keydown.enter)="onEnterPressed()"
           />
         </div>
 
@@ -210,6 +211,9 @@ interface BeforeInputEvent extends Event {
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true },
     { provide: MatFormFieldControl, useExisting: forwardRef(() => NgxsmkTelInputComponent) }
+  ],
+  viewProviders: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgxsmkTelInputComponent), multi: true }
   ]
 })
 export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, Validator, MatFormFieldControl<string | null> {
@@ -236,7 +240,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   isNativelyDisabled = false;
 
   ngOnInit(): void {
-    this.ngControl = this.injector.get(NgControl, null);
+    this.ngControl = this.injector.get(NgControl, null, { self: true, optional: true });
   }
 
   ngAfterContentInit(): void {
@@ -714,6 +718,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     await this.initIntlTelInput();
     if (this.isDestroyed) return;
 
+    this.initialized = true;
+
     this.bindDomListeners();
 
     if (this.pendingWrite !== null && !this.isDestroyed) {
@@ -727,12 +733,6 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
         if (!this.isDestroyed) this.focus();
       });
     }
-
-    setTimeout(() => {
-      if (!this.isDestroyed) {
-        this.initialized = true;
-      }
-    }, 50);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -900,6 +900,10 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
   validate(control: AbstractControl): ValidationErrors | null {
     if (this.isDestroyed) return null;
 
+    if (!control || control.value === null || control.value === undefined || control.value === '') {
+      return null;
+    }
+
     const raw = this.currentRaw();
     if (!raw) return null;
 
@@ -1064,10 +1068,10 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     const prevIso2 = (this.iti?.getSelectedCountryData?.().iso2 || this.initialCountry || 'US').toString().toLowerCase();
     const prevValue = this.currentRaw();
 
-    this.initialized = false;
     this.cleanupEventListeners();
     this.destroyPlugin();
     await this.initIntlTelInput();
+    this.initialized = true;
     this.bindDomListeners();
 
     if (!this.isDestroyed) {
@@ -1083,12 +1087,6 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
       }
       this.applyDisabledUi(this.disabled);
       this.lastActiveCountry = this.currentIso2();
-
-      setTimeout(() => {
-        if (!this.isDestroyed) {
-          this.initialized = true;
-        }
-      }, 50);
     }
   }
 
@@ -1253,17 +1251,12 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
         this.handleInput();
       };
 
-      const blurHandler = () => {
-        if (!this.isDestroyed) this.onBlur();
-      };
-
       // Store listeners for cleanup
       this.eventListeners = [
         { element: el, event: 'beforeinput', handler: beforeInputHandler },
         { element: el, event: 'paste', handler: pasteHandler },
         { element: el, event: 'input', handler: inputHandler },
-        { element: el, event: 'countrychange', handler: countryChangeHandler },
-        { element: el, event: 'blur', handler: blurHandler }
+        { element: el, event: 'countrychange', handler: countryChangeHandler }
       ];
 
       this.eventListeners.forEach(({ element, event, handler }) => {
@@ -1339,10 +1332,8 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     });
   }
 
-  onEnterPressed(event: Event) {
+  onEnterPressed() {
     if (this.isDestroyed) return;
-
-    event.preventDefault();
 
     this.touched = true;
     this.stateSignal.update(state => ({
@@ -1355,31 +1346,6 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
       this.validatorChange?.();
     });
     this.cdr.markForCheck();
-
-    // Try to submit the native form
-    const form = this.hostElementRef.nativeElement.closest('form');
-    if (form) {
-      const submitBtn = form.querySelector('button:not([type]), button[type="submit"], input[type="submit"]') as HTMLElement | null;
-      if (submitBtn) {
-        if (!submitBtn.matches(':disabled')) {
-          submitBtn.click();
-        }
-      } else {
-        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
-        form.dispatchEvent(submitEvent);
-        if (!submitEvent.defaultPrevented) {
-          try {
-            if (typeof form.requestSubmit === 'function') {
-              form.requestSubmit();
-            } else {
-              form.submit();
-            }
-          } catch (e) {
-            // Ignore
-          }
-        }
-      }
-    }
   }
 
   private handleInput() {

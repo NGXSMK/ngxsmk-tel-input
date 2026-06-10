@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4] - 2026-06-10
+
+### Fixed
+- **No Value Accessor (NG01203)**: Added `ReactiveFormsModule` and `FormsModule` to component imports and `NG_VALUE_ACCESSOR` to `viewProviders` alongside `providers`, ensuring proper resolution for standalone components across all Angular DI scopes.
+- **Touched State During Initialization**: Removed the 50ms `setTimeout` delay on `initialized` flag and eliminated the redundant native blur event listener to prevent race conditions where intl-tel-input plugin events during setup could prematurely mark the field as touched.
+- **Submit on Enter with [formGroup]**: Removed `event.preventDefault()` and manual `setTimeout` submission logic from `onEnterPressed()`. The browser's native Enter key behavior now triggers the submit button click naturally, which correctly fires Angular's `(ngSubmit)` handler.
+
 ## [1.8.4-beta.1] - 2026-06-08
 
 ### Fixed
