@@ -173,7 +173,7 @@ interface BeforeInputEvent extends Event {
             [attr.aria-errormessage]="showError() && resolvedErrorText() && (showErrorMsgSignal() ?? showErrorMsg) ? resolvedId + '-error' : null"
             (blur)="onBlur()"
             (focus)="onFocus()"
-            (keydown.enter)="onEnterPressed()"
+            (keydown.enter)="onEnterPressed($event)"
           />
         </div>
 
@@ -1332,7 +1332,7 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
     });
   }
 
-  onEnterPressed() {
+  onEnterPressed(event: Event) {
     if (this.isDestroyed) return;
 
     this.touched = true;
@@ -1346,6 +1346,22 @@ export class NgxsmkTelInputComponent implements OnInit, DoCheck, AfterContentIni
       this.validatorChange?.();
     });
     this.cdr.markForCheck();
+
+    // Programmatically submit the closest form to trigger (submit) / (ngSubmit).
+    // This runs synchronously (no setTimeout) to stay in the Angular zone.
+    const form = this.hostElementRef.nativeElement.closest('form');
+    if (form) {
+      try {
+        if (typeof form.requestSubmit === 'function') {
+          form.requestSubmit();
+        } else {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      } catch (e) {
+        // Fallback if requestSubmit throws (e.g. no submit button)
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
   }
 
   private handleInput() {
